@@ -19,7 +19,6 @@
 package com.squareup.contour
 
 import android.content.Context
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +32,9 @@ import com.squareup.contour.solvers.AxisSolver
 import com.squareup.contour.solvers.ComparisonResolver
 import com.squareup.contour.solvers.ComparisonResolver.CompareBy.MaxOf
 import com.squareup.contour.solvers.ComparisonResolver.CompareBy.MinOf
+import com.squareup.contour.solvers.RelativeXAxisSolver
+import com.squareup.contour.solvers.RelativeXAxisSolver.Point.End
+import com.squareup.contour.solvers.RelativeXAxisSolver.Point.Start
 import com.squareup.contour.solvers.SimpleAxisSolver
 import com.squareup.contour.solvers.SimpleAxisSolver.Point.Baseline
 import com.squareup.contour.solvers.SimpleAxisSolver.Point.Max
@@ -48,6 +50,12 @@ import com.squareup.contour.utils.unwrapYIntLambda
 import com.squareup.contour.utils.unwrapYIntToYIntLambda
 import com.squareup.contour.wrappers.HasDimensions
 import com.squareup.contour.wrappers.ParentGeometry
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.BOTTOM
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.END
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.LEFT
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.RIGHT
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.START
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.TOP
 import com.squareup.contour.wrappers.ViewDimensions
 import kotlin.math.max
 import kotlin.math.min
@@ -177,17 +185,26 @@ open class ContourLayout(
   private val geometry = ParentGeometry(
       widthConfig = widthConfig,
       heightConfig = heightConfig,
-      paddingConfig = {
-        if (respectPadding) {
-          Rect(paddingLeft, paddingTop, paddingRight, paddingBottom)
+      isRtl = { rtl },
+      padding = { direction ->
+        if (!respectPadding) {
+          0
         } else {
-          Rect(0, 0, 0, 0)
+          when (direction) {
+            LEFT -> paddingLeft
+            START -> paddingStart
+            TOP -> paddingTop
+            RIGHT -> paddingRight
+            END -> paddingEnd
+            BOTTOM -> paddingBottom
+          }
         }
       }
   )
   private var constructed: Boolean = true
   private var lastWidthSpec: Int = 0
   private var lastHeightSpec: Int = 0
+  private var rtl: Boolean = false
 
   override fun requestLayout() {
     if (constructed) {
@@ -227,11 +244,17 @@ open class ContourLayout(
 
       val params = child.spec()
       params.measureSelf()
+
       child.layout(
-          params.left().value, params.top().value,
-          params.right().value, params.bottom().value
+          params.left(rtl).value, params.top(rtl).value,
+          params.right(rtl).value, params.bottom(rtl).value
       )
     }
+  }
+
+  override fun onRtlPropertiesChanged(layoutDirection: Int) {
+    super.onRtlPropertiesChanged(layoutDirection)
+    rtl = layoutDirection == View.LAYOUT_DIRECTION_RTL
   }
 
   private fun invalidateAll() {
@@ -471,37 +494,49 @@ open class ContourLayout(
    * The left position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out left position of the [View]
    */
-  fun View.left(): XInt = handleCrd { spec().left() }
+  fun View.left(): XInt = handleCrd { spec().left(rtl = false) }
+
+  /**
+   * The start position of the receiver [View]. Guaranteed to return the resolved value or throw.
+   * @return the laid-out start position of the [View]
+   */
+  fun View.start(): XInt = handleCrd { spec().left(rtl) }
 
   /**
    * The top position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out top position of the [View]
    */
-  fun View.top(): YInt = handleCrd { spec().top() }
+  fun View.top(): YInt = handleCrd { spec().top(rtl) }
 
   /**
    * The right position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out right position of the [View]
    */
-  fun View.right(): XInt = handleCrd { spec().right() }
+  fun View.right(): XInt = handleCrd { spec().right(rtl = false) }
+
+  /**
+   * The end position of the receiver [View]. Guaranteed to return the resolved value or throw.
+   * @return the laid-out end position of the [View]
+   */
+  fun View.end(): XInt = handleCrd { spec().right(rtl) }
 
   /**
    * The bottom position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out bottom position of the [View]
    */
-  fun View.bottom(): YInt = handleCrd { spec().bottom() }
+  fun View.bottom(): YInt = handleCrd { spec().bottom(rtl) }
 
   /**
    * The center-x position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out left center-x of the [View]
    */
-  fun View.centerX(): XInt = handleCrd { spec().centerX() }
+  fun View.centerX(): XInt = handleCrd { spec().centerX(rtl) }
 
   /**
    * The center-y position of the receiver [View]. Guaranteed to return the resolved value or throw.
    * @return the laid-out center-y position of the [View]
    */
-  fun View.centerY(): YInt = handleCrd { spec().centerY() }
+  fun View.centerY(): YInt = handleCrd { spec().centerY(rtl) }
 
   /**
    * The baseline position of the receiver [View]. Guaranteed to return the resolved value or throw.
@@ -566,9 +601,21 @@ open class ContourLayout(
         lambda = unwrapXIntLambda(provider)
     )
 
+  fun startTo(provider: LayoutContainer.() -> XInt): HasStart =
+    RelativeXAxisSolver(
+        point = Start,
+        lambda = unwrapXIntLambda(provider)
+    )
+
   fun rightTo(provider: LayoutContainer.() -> XInt): HasRight =
     SimpleAxisSolver(
         point = Max,
+        lambda = unwrapXIntLambda(provider)
+    )
+
+  fun endTo(provider: LayoutContainer.() -> XInt): HasEnd =
+    RelativeXAxisSolver(
+        point = End,
         lambda = unwrapXIntLambda(provider)
     )
 
@@ -745,12 +792,12 @@ open class ContourLayout(
       y.onAttach(this)
     }
 
-    internal fun left(): XInt = x.min().toXInt()
-    internal fun right(): XInt = x.max().toXInt()
-    internal fun centerX(): XInt = x.mid().toXInt()
-    internal fun top(): YInt = y.min().toYInt()
-    internal fun bottom(): YInt = y.max().toYInt()
-    internal fun centerY(): YInt = y.mid().toYInt()
+    internal fun left(rtl: Boolean): XInt = x.min(rtl).toXInt()
+    internal fun right(rtl: Boolean): XInt = x.max(rtl).toXInt()
+    internal fun centerX(rtl: Boolean): XInt = x.mid(rtl).toXInt()
+    internal fun top(rtl: Boolean): YInt = y.min(rtl).toYInt()
+    internal fun bottom(rtl: Boolean): YInt = y.max(rtl).toYInt()
+    internal fun centerY(rtl: Boolean): YInt = y.mid(rtl).toYInt()
     internal fun baseline(): YInt = y.baseline().toYInt()
     internal fun width(): XInt = x.range().toXInt()
     internal fun height(): YInt = y.range().toYInt()

@@ -83,8 +83,8 @@ class SampleView1(context: SampleActivity) : ContourLayout(context) {
 
   private fun initializeLayout() {
     avatar.layoutBy(
-        leftTo {
-          parent.left()
+        startTo {
+          parent.start()
         }.widthOf {
           name.width()
         },
@@ -95,21 +95,21 @@ class SampleView1(context: SampleActivity) : ContourLayout(context) {
         }
     )
     name.layoutBy(
-        leftTo { avatar.left() },
+        startTo { avatar.start() },
         topTo { avatar.bottom() + 5.dip }
     )
     description.layoutBy(
-        leftTo {
-          name.right() + 15.dip
-        }.rightTo {
-          parent.right()
+        startTo {
+          name.end() + 15.dip
+        }.endTo {
+          parent.end()
         },
         topTo {
           parent.top()
         }
     )
     starDate.layoutBy(
-        rightTo { parent.right() },
+        endTo { parent.end() },
         maxOf(
             topTo { description.bottom() + 5.dip },
             bottomTo { name.bottom() }
@@ -117,7 +117,7 @@ class SampleView1(context: SampleActivity) : ContourLayout(context) {
     )
 
     paddingAdjusterWidget.layoutBy(
-        leftTo { parent.left() }.rightTo { parent.right() },
+        startTo { parent.start() }.endTo { parent.end() },
         topTo { starDate.bottom() + 30.dip }
     )
   }

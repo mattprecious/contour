@@ -41,13 +41,13 @@ interface AxisSolver {
    * Represents the left or top point of a component in pixels relative to the parent layout's top / left
    * Calling this method may trigger work.
    */
-  fun min(): Int
+  fun min(rtl: Boolean): Int
 
   /**
    * Represents the center x or y point of a component in pixels relative to the parent layout's top / left
    * Calling this method may trigger work.
    */
-  fun mid(): Int
+  fun mid(rtl: Boolean): Int
 
   /**
    * Represents the text baseline of a component with text on the y axis relative parent layout's top.
@@ -61,7 +61,7 @@ interface AxisSolver {
    * Represents the right or bottom point of a component in pixels relative to the parent layout's top / left
    * Calling this method may trigger work.
    */
-  fun max(): Int
+  fun max(rtl: Boolean): Int
 
   /**
    * Represents the width or height of a component in pixels. This may be solved without any of the axis point being

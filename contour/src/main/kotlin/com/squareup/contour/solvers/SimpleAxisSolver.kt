@@ -66,7 +66,7 @@ internal class SimpleAxisSolver(
   private var range = Int.MIN_VALUE
   private var baselineRange = Int.MIN_VALUE
 
-  override fun min(): Int {
+  override fun min(rtl: Boolean): Int {
     if (min == Int.MIN_VALUE) {
       if (p0.point == Point.Min) {
         min = p0.resolve()
@@ -78,7 +78,7 @@ internal class SimpleAxisSolver(
     return min
   }
 
-  override fun mid(): Int {
+  override fun mid(rtl: Boolean): Int {
     if (mid == Int.MIN_VALUE) {
       if (p0.point == Point.Mid) {
         mid = p0.resolve()
@@ -102,7 +102,7 @@ internal class SimpleAxisSolver(
     return baseline
   }
 
-  override fun max(): Int {
+  override fun max(rtl: Boolean): Int {
     if (max == Int.MIN_VALUE) {
       if (p0.point == Point.Max) {
         max = p0.resolve()

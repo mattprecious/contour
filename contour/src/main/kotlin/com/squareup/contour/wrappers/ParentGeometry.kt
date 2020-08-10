@@ -19,25 +19,53 @@ package com.squareup.contour.wrappers
 import android.graphics.Rect
 import com.squareup.contour.Geometry
 import com.squareup.contour.XInt
+import com.squareup.contour.XInt.Companion
 import com.squareup.contour.YInt
 import com.squareup.contour.constraints.SizeConfig
 import com.squareup.contour.utils.toXInt
 import com.squareup.contour.utils.toYInt
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.BOTTOM
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.END
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.LEFT
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.RIGHT
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.START
+import com.squareup.contour.wrappers.ParentGeometry.PaddingDirection.TOP
 
 internal class ParentGeometry(
   private val widthConfig: SizeConfig,
   private val heightConfig: SizeConfig,
-  private val paddingConfig: () -> Rect
+  private val isRtl: () -> Boolean,
+  private val padding: (PaddingDirection) -> Int
 ) : Geometry {
-  override fun left(): XInt = XInt.ZERO + padding().left
-  override fun right(): XInt = widthConfig.resolve().toXInt() - padding().right
+  enum class PaddingDirection {
+    LEFT,
+    START,
+    TOP,
+    RIGHT,
+    END,
+    BOTTOM
+  }
+  override fun left(): XInt = XInt.ZERO + padding(LEFT)
+  override fun start(): XInt {
+    return if (isRtl()) {
+      widthConfig.resolve().toXInt() - padding(START)
+    } else {
+      XInt.ZERO + padding(START)
+    }
+  }
+  override fun right(): XInt = widthConfig.resolve().toXInt() - padding(RIGHT)
+  override fun end(): XInt {
+    return if (isRtl()) {
+      XInt.ZERO + padding(END)
+    } else {
+      return widthConfig.resolve().toXInt() - padding(END)
+    }
+  }
   override fun width(): XInt = widthConfig.resolve().toXInt()
   override fun centerX(): XInt = widthConfig.resolve().toXInt() / 2
 
-  override fun top(): YInt = YInt.ZERO + padding().top
-  override fun bottom(): YInt = heightConfig.resolve().toYInt() - padding().bottom
+  override fun top(): YInt = YInt.ZERO + padding(TOP)
+  override fun bottom(): YInt = heightConfig.resolve().toYInt() - padding(BOTTOM)
   override fun height(): YInt = heightConfig.resolve().toYInt()
   override fun centerY(): YInt = heightConfig.resolve().toYInt() / 2
-
-  override fun padding(): Rect = paddingConfig()
 }

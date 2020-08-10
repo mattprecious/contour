@@ -65,6 +65,18 @@ interface HasLeft : XAxisSolver, HasXPositionWithoutWidth {
   ): XAxisSolver
 }
 
+interface HasStart : XAxisSolver, HasXPositionWithoutWidth {
+  fun endTo(
+    mode: SizeMode = Exact,
+    provider: LayoutContainer.() -> XInt
+  ): XAxisSolver
+
+  fun endToFloat(
+    mode: SizeMode = Exact,
+    provider: LayoutContainer.() -> XFloat
+  ): XAxisSolver
+}
+
 interface HasRight : XAxisSolver, HasXPositionWithoutWidth {
   fun leftTo(
     mode: SizeMode = Exact,
@@ -72,6 +84,18 @@ interface HasRight : XAxisSolver, HasXPositionWithoutWidth {
   ): XAxisSolver
 
   fun leftToFloat(
+    mode: SizeMode = Exact,
+    provider: LayoutContainer.() -> XFloat
+  ): XAxisSolver
+}
+
+interface HasEnd : XAxisSolver, HasXPositionWithoutWidth {
+  fun startTo(
+    mode: SizeMode = Exact,
+    provider: LayoutContainer.() -> XInt
+  ): XAxisSolver
+
+  fun startToFloat(
     mode: SizeMode = Exact,
     provider: LayoutContainer.() -> XFloat
   ): XAxisSolver

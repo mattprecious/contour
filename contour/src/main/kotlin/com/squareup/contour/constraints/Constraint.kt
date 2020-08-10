@@ -21,6 +21,7 @@ import com.squareup.contour.SizeMode
 import com.squareup.contour.SizeMode.Exact
 import com.squareup.contour.errors.CircularReferenceDetected
 import com.squareup.contour.solvers.SimpleAxisSolver.Point
+import com.squareup.contour.solvers.RelativeXAxisSolver.Point as RelativePoint
 
 internal open class Constraint {
   private var isResolving: Boolean = false
@@ -60,6 +61,15 @@ internal open class Constraint {
 
 internal class PositionConstraint(
   var point: Point = Point.Min,
+  lambda: (LayoutContainer.() -> Int)? = null
+) : Constraint() {
+  init {
+    this.lambda = lambda
+  }
+}
+
+internal class RelativePositionConstraint(
+  var point: RelativePoint = RelativePoint.Start,
   lambda: (LayoutContainer.() -> Int)? = null
 ) : Constraint() {
   init {

@@ -38,18 +38,18 @@ internal class ComparisonResolver(
   private lateinit var parent: LayoutSpec
   private var range: Int = Int.MIN_VALUE
 
-  private fun findWinner(): AxisSolver {
+  private fun findWinner(rtl: Boolean): AxisSolver {
     val found = found
     if (found != null) return found
     else {
       when (compareBy) {
         MaxOf -> {
-          val max = if (p0.min() >= p1.min()) p0 else p1
+          val max = if (p0.min(rtl) >= p1.min(rtl)) p0 else p1
           this.found = max
           return max
         }
         MinOf -> {
-          val min = if (p0.min() <= p1.min()) p0 else p1
+          val min = if (p0.min(rtl) <= p1.min(rtl)) p0 else p1
           this.found = min
           return min
         }
@@ -58,10 +58,10 @@ internal class ComparisonResolver(
     }
   }
 
-  override fun min(): Int = findWinner().min()
-  override fun mid(): Int = findWinner().mid()
-  override fun baseline(): Int = findWinner().baseline()
-  override fun max(): Int = findWinner().max()
+  override fun min(rtl: Boolean): Int = findWinner(rtl).min(rtl)
+  override fun mid(rtl: Boolean): Int = findWinner(rtl).mid(rtl)
+  override fun baseline(): Int = findWinner(rtl = false).baseline()
+  override fun max(rtl: Boolean): Int = findWinner(rtl).max(rtl)
 
   override fun range(): Int {
     if (range == Int.MIN_VALUE) {

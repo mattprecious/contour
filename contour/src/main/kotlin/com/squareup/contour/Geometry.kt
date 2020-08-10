@@ -28,7 +28,9 @@ import android.graphics.Rect
  */
 interface Geometry {
   fun left(): XInt
+  fun start(): XInt
   fun right(): XInt
+  fun end(): XInt
   fun width(): XInt
   fun centerX(): XInt
 
@@ -36,6 +38,4 @@ interface Geometry {
   fun bottom(): YInt
   fun height(): YInt
   fun centerY(): YInt
-
-  fun padding(): Rect
 }
